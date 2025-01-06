@@ -16,7 +16,7 @@ class CampaignRepository
     {
         $campaign = Campaign::create($fields);
 
-        ManageCampaignEvent::dispatch($campaign,__FUNCTION__);
+//        ManageCampaignEvent::dispatch($campaign,__FUNCTION__);
     }
 
     public function update(int $campaignId, array $fields)

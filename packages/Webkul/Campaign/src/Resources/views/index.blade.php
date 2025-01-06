@@ -34,8 +34,10 @@
 
 
                 <!-- DataGrid Shimmer -->
-{{--                <x-admin::shimmer.datagrid />--}}
+                <x-admin::datagrid :src="route('admin.campaign.index')">
+                    <!-- DataGrid Shimmer -->
+                    <x-admin::shimmer.datagrid />
+                </x-admin::datagrid>
             </div>
         </v-qoute>
-
 </x-admin::layouts>

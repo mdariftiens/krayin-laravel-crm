@@ -30,6 +30,7 @@ class CampaignRequest extends FormRequest
             'start_date' => ['required', 'date', 'after:yesterday'],
             'end_date' => ['required', 'date', 'after:yesterday'],
             'package_id' => ['required', 'integer'],
+            'budget' => ['required', 'integer'],
         ];
     }
 }

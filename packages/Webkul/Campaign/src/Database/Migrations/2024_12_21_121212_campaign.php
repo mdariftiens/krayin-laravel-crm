@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('campaigns', function (Blueprint $table) {
-            $table->id();
+        Schema::create('campaigns', function (Blueprint $table) {
+            $table->increments('id');
             $table->string('name');
             $table->enum('type',\Webkul\Campaign\Enums\CampaignType::toArray());//
             $table->string('description')->nullable();
@@ -28,13 +28,14 @@ return new class extends Migration
             $table->integer('total_message_sent')->default(0);
             $table->enum('purpose',\Webkul\Campaign\Enums\CampaignPurpose::toArray());
             $table->integer('priority')->default(5);
+            $table->timestamps();
         });
 
-        Schema::table('message_history', function (Blueprint $table) {
+        Schema::create('message_history', function (Blueprint $table) {
             $table->id();
             $table->integer('campaign_id');
             $table->text('message')->nullable();
-            $table->integer('status',['sent','well be sent','fail']);
+            $table->enum('status',['sent','well be sent','fail']);
             $table->string('fail_reason');
             $table->timestampsTz();
         });

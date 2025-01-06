@@ -18,5 +18,8 @@ class Campaign extends Model
         'start_date',
         'end_date',
         'package_id',
+        'budget',
+        'updated_at',
+        'created_at'
     ];
 }

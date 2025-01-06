@@ -2,11 +2,17 @@
 
 namespace Webkul\Campaign\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
+use Webkul\Admin\Http\Requests\MassDestroyRequest;
+use Webkul\Campaign\DataGrids\PersonDataGrid;
 use Webkul\Campaign\Http\Requests\CampaignRequest;
+use Webkul\Campaign\Models\Campaign;
 use Webkul\Campaign\Repositories\CampaignRepository;
 
 class CampaignController extends Controller
@@ -27,6 +33,11 @@ class CampaignController extends Controller
      */
     public function index()
     {
+        if (request()->ajax()) {
+            return datagrid(PersonDataGrid::class)->process();
+        }
+
+//        return view('admin::contacts.persons.index');
         return view('campaign::index');
     }
 
@@ -48,11 +59,8 @@ class CampaignController extends Controller
     public function store(CampaignRequest $request)
     {
         $this->campaignRepository->create($request->validated());
-
-        return back()->with([
-            'status'=>'success',
-            'message'=>'Campaign Created successfully'
-        ]);
+        session()->flash('success', trans('Campaign created successfully.'));
+        return redirect()->route('admin.campaign.index');
     }
 
     /**
@@ -63,7 +71,8 @@ class CampaignController extends Controller
      */
     public function edit($id)
     {
-
+        $campaign = Campaign::findOrFail($id);
+        return view('campaign::edit', compact('campaign'));
     }
 
     /**
@@ -72,9 +81,11 @@ class CampaignController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update($id)
+    public function update(Request $request, $id)
     {
-
+        Campaign::where('id', $id)->update($request->except('_token'));
+        session()->flash('success', trans('admin::app.products.index.update-success'));
+        return redirect()->route('admin.campaign.index');
     }
 
     /**
@@ -83,8 +94,29 @@ class CampaignController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(int $id): JsonResponse
     {
+        $Campaign = Campaign::findOrFail($id);
+        try {
+            $Campaign->delete($id);
+            return response()->json([
+                'message' => trans('Campaign deleted successfully.'),
+            ], 200);
+        } catch (\Exception $exception) {
+            return response()->json([
+                'message' => trans('Campaign cannot be deleted. Please, try again.'),
+            ], 400);
+        }
+    }
+    public function massDestroy(MassDestroyRequest $massDestroyRequest): \Illuminate\Http\JsonResponse
+    {
+        $campaign = Campaign::whereIn('id', $massDestroyRequest->input('indices'))->get();
 
+        foreach ($campaign as $value) {
+            DB::table('campaigns')->where('id', $value->id)->delete();
+        }
+        return response()->json([
+            'message' => trans('Campains deleted successfully.'),
+        ]);
     }
 }
